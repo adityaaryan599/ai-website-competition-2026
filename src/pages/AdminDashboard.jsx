@@ -1,16 +1,88 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+
 export default function AdminDashboard() {
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
+
+  const fullName = user?.user_metadata?.full_name || 'Sports Administrator'
+  const email = user?.email || 'N/A'
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    setLogoutError('')
+    try {
+      const { error } = await signOut()
+      if (error) {
+        setLogoutError(error.message || 'Logout failed. Please try again.')
+        setIsLoggingOut(false)
+        return
+      }
+      navigate('/login', { replace: true })
+    } catch (err) {
+      setLogoutError(err.message || 'An unexpected error occurred during logout.')
+      setIsLoggingOut(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {/* Top Banner with Real Auth State */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Admin Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Sports administration, equipment inventory, and ground request management
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Admin Dashboard</h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+              Admin Portal
+            </span>
+          </div>
+          <p className="text-sm text-slate-600">
+            Welcome back, <span className="font-semibold text-slate-900">{fullName}</span> ({email})
           </p>
         </div>
-        <span className="self-start sm:self-auto inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-          Admin Portal (Placeholder)
-        </span>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="px-4 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+          >
+            {isLoggingOut ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                <span>Logging out...</span>
+              </>
+            ) : (
+              'Log Out'
+            )}
+          </button>
+        </div>
+      </div>
+
+      {logoutError && (
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+          {logoutError}
+        </div>
+      )}
+
+      {/* Authenticated Profile Card */}
+      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-purple-600 text-white font-bold text-lg flex items-center justify-center">
+            {fullName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{fullName}</p>
+            <p className="text-xs text-slate-500">{email}</p>
+          </div>
+        </div>
+        <div className="text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
+          Privilege tier: <span className="text-purple-700 font-semibold">Campus Sports Officer</span>
+        </div>
       </div>
 
       {/* Metrics placeholder */}
