@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthProvider'
+import { ThemeProvider } from './context/ThemeProvider'
 import MainLayout from './layouts/MainLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
@@ -69,34 +70,31 @@ function OAuthCallbackHandler() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <OAuthCallbackHandler />
-      <Routes>
-        <Route path="/" element={<MainLayout />}>
-          {/* Public Routes */}
-          <Route index element={<Home />} />
-          <Route path="login" element={<Login />} />
-          <Route path="signup" element={<Signup />} />
-
-          {/* Protected Routes: General / Student */}
+    <ThemeProvider>
+      <AuthProvider>
+        <OAuthCallbackHandler />
+        <Routes>
+          {/* Protected Dashboards: Full-viewport Experience */}
           <Route element={<ProtectedRoute />}>
             <Route path="student-dashboard" element={<StudentDashboard />} />
+            <Route path="admin-dashboard" element={<AdminDashboard />} />
             <Route path="dashboard" element={<DashboardRedirect />} />
             {/* Path aliases */}
             <Route path="student/dashboard" element={<Navigate to="/student-dashboard" replace />} />
-          </Route>
-
-          {/* Protected Routes: Admin Only */}
-          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route path="admin-dashboard" element={<AdminDashboard />} />
-            {/* Path aliases */}
             <Route path="admin/dashboard" element={<Navigate to="/admin-dashboard" replace />} />
           </Route>
 
-          {/* 404 Route */}
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </AuthProvider>
+          {/* Public & Website Routes wrapped in MainLayout */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="login" element={<Login />} />
+            <Route path="signup" element={<Signup />} />
+
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

@@ -85,7 +85,6 @@ export default function Signup() {
       }
 
       // Check if Supabase requires email verification
-      // When email confirmation is enabled, a user object is returned without a session
       if (data?.user && !data?.session) {
         setEmailConfirmationRequired(true)
         setSuccessMessage(
